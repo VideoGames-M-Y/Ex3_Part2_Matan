@@ -1,0 +1,36 @@
+name: Unity C# Linter
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    name: Run C# Linter
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Ensure the full repository is fetched
+
+      - name: List files in repository
+        run: ls -la  # List all files at the root level for debugging
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.x'  # Adjust to the required .NET version for Unity
+
+      - name: Install dotnet-format
+        run: dotnet tool install -g dotnet-format
+
+      - name: Check if Assets/Scripts exists
+        run: |
+          if [ -d "Assets/Scripts" ]; then
+            echo "Assets/Scripts found, running dotnet-format..."
+            dotnet-format ./Assets/Scripts --check --folder --include '*/.cs' --verbosity diagnostic
+          else
+            echo "Assets/Scripts not found, skipping dotnet-format."
+          fi
